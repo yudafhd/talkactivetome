@@ -1,8 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+declare global {
+    interface Window {
+        SpeechRecognition: any;
+        webkitSpeechRecognition: any;
+    }
+}
 
 export default function MeetPage() {
     const [micOn, setMicOn] = useState(false);
@@ -26,7 +36,7 @@ export default function MeetPage() {
         recognition.interimResults = false;
         recognition.continuous = false;
 
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
+        recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
             setMessages((prev) => {
                 return [...prev, { sender: "yuda", text: transcript }]
@@ -34,7 +44,7 @@ export default function MeetPage() {
             setMicOn(false)
         };
 
-        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        recognition.onerror = (event: any) => {
             console.error('Error:', event.error);
         };
 
