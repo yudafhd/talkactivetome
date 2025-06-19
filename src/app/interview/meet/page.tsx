@@ -18,12 +18,8 @@ export default function MeetPage() {
     const [micOn, setMicOn] = useState(false);
     const [messages, setMessages] = useState<{ sender: string, text: string }[]>([])
     const recognitionRef = useRef<any>(null);
-    const toggleMic = () => setMicOn(!micOn);
     const router = useRouter();
 
-    const exitRoom = () => {
-        router.push("/")
-    }
     useEffect(() => {
         const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SpeechRecognition) {
@@ -39,6 +35,9 @@ export default function MeetPage() {
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
             setMessages((prev) => {
+
+                handleAISubmit(transcript)
+
                 return [...prev, { sender: "yuda", text: transcript }]
             });
             setMicOn(false)
@@ -60,6 +59,24 @@ export default function MeetPage() {
             recognitionRef.current?.stop()
         }
     }, [micOn])
+
+    const exitRoom = () => {
+        router.push("/")
+    }
+
+    const toggleMic = () => setMicOn(!micOn);
+
+    const handleAISubmit = async (text: string) => {
+        const res = await fetch('/api/interview/meet', {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messages: [{ role: 'user', content: text }],
+            }),
+        })
+        const data = res.json()
+        console.log(data);
+    }
 
     return (
         <main className="min-h-screen bg-black text-white flex items-center justify-center p-4">
