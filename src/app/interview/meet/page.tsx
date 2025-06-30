@@ -19,6 +19,20 @@ export default function MeetPage() {
     const [messages, setMessages] = useState<{ sender: string, text: string }[]>([])
     const recognitionRef = useRef<any>(null);
     const router = useRouter();
+    const firstMessage = messages[0]?.text || "";
+    const isInterviewer = messages[0]?.sender === "interviewer";
+
+    useEffect(() => {
+        const synth = window.speechSynthesis;
+        if (firstMessage && isInterviewer) {
+            const utterance = new SpeechSynthesisUtterance(firstMessage);
+            synth.speak(utterance);
+        }
+
+        return () => {
+            synth.cancel();
+        };
+    }, [firstMessage, isInterviewer]);
 
     useEffect(() => {
         const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -34,11 +48,9 @@ export default function MeetPage() {
 
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
+            handleAISubmit(transcript)
             setMessages((prev) => {
-
-                handleAISubmit(transcript)
-
-                return [...prev, { sender: "yuda", text: transcript }]
+                return [{ sender: "you", text: transcript }, ...prev]
             });
             setMicOn(false)
         };
@@ -71,11 +83,11 @@ export default function MeetPage() {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                messages: [{ role: 'user', content: text }],
+                messages: text,
             }),
         })
-        const data = res.json()
-        console.log(data);
+        const data = await res.json()
+        setMessages((prev) => [{ sender: "interviewer", text: data }, ...prev]);
     }
 
     return (
@@ -91,8 +103,9 @@ export default function MeetPage() {
                     <h2 className="text-lg font-semibold mb-2">Chat</h2>
                     <div className="flex-1 overflow-y-auto space-y-3">
                         {messages.map((msg, index) => (
-                            <div key={index} className="bg-gray-800 p-3 rounded-md">
-                                <p className="text-sm font-bold">{msg.sender}</p>
+                            <div key={index}
+                                className={`${index === 0 ? 'bg-blue-500' : 'bg-gray-800'} p-3 rounded-md`}>
+                                <p className="text-sm font-bold">{msg.sender} {index !== 0 || "(New)"}</p>
                                 <p className="text-sm">{msg.text}</p>
                             </div>
                         ))}
