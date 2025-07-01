@@ -12,14 +12,17 @@ export async function POST(req: NextRequest) {
             contents: messages,
             config: {
                 temperature: 0.7,
-                systemInstruction: `you are the interviewer, 
-                your name is Mahesa. Dont talk too long, 
-                keep your answer short and concise. You are interviewing a candidate for a job position. 
-                The candidate is a software engineer with 5 years of experience in web development. 
-                Ask questions related to their experience, skills, and projects.`,
+                systemInstruction: `I want you to act as an interviewer. 
+                I will be the candidate and you will ask me the interview 
+                questions for the Software Engineer position. I want you 
+                to only reply as the interviewer. Do not write all the 
+                conversation at once. I want you to only do the interview 
+                with me. Ask me the questions and wait for my answers. 
+                Do not write explanations. Ask me the questions one by one 
+                like an interviewer does and wait for my answers. My first 
+                sentence is "Hi"`,
             },
         });
-
         return NextResponse.json(response.text);
     } catch (error) {
         console.error('Interview API Error:', error);
